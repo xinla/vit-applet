@@ -2,13 +2,15 @@
   "pages": [
     "pages/index/main",
     "pages/logs/main",
-    "pages/counter/main"
+    "pages/counter/main",
+    "pages/agreement/main",
+    "pages/consult/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "WeChat",
-    "navigationBarTextStyle": "black"
+    "navigationBarBackgroundColor": "#ffb252",
+    "navigationBarTitleText": "华圣百惠",
+    "navigationBarTextStyle": "white"
   },
   "tabBar": {
     "color": "#999",

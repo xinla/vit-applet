@@ -31,6 +31,10 @@ export default {
 </script>
 
 <style>
+div{
+  color: #444;
+  font-size: 14px;
+}
 .container {
   height: 100%;
   display: flex;
@@ -46,5 +50,50 @@ export default {
   -moz-transition: width 2s;
   -webkit-transition: width 2s;
   -o-transition: width 2s;
+}
+/* common class */
+/*bfc model*/
+.bfc-o { overflow: hidden;position: relative;}
+.bfc-d,.dib { display: inline-block; vertical-align: top;position: relative;}
+.bfc-p { position: absolute; }
+.fl { float: left; position: relative; }
+.fr { float: right; position: relative; }
+.al { text-align:left; }
+.ac { text-align:center; }
+.ar { text-align:right; }
+.hide { display:none; }
+/*top-fixed and bottom-fixed*/
+.tf,.bf{
+    position: fixed;
+    width: 100%;
+    height: 50px;
+    z-index: 999;
+}
+.tf{top: 0;}
+.bf{bottom: 0;}
+
+/*mask*/
+.mask{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(39, 39, 39, 0.76);
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  z-index: 999999; 
+}
+/*center-center*/
+.cc{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+/*t-o-h-e*/
+.oe{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
