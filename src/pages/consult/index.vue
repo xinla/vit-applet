@@ -50,6 +50,8 @@
 </template>
 
 <script>
+import {saveUser, getInfo, getCode} from '@/api/seasUser'
+
 export default {
   data() {
     return {

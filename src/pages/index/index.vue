@@ -41,7 +41,7 @@
       <div class="bottton" @click="submit">
         立即咨询
       </div>
-      <div class="agreen">
+      <div class="agreen ac">
       <switch type="checkbox" @change="checkboxChange"/>
         勾选即表示已阅读并同意
         <span class="yellow"><a href="../agreement/main">《融资居间服务委托授权书》</a></span>
@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import {saveUser, getInfo, getCode, login} from '@/api/seasUser'
+
 export default {
   components: {
   },
@@ -79,7 +81,26 @@ export default {
   methods: {
     submit () {
       if (this.value) {
-        wx.navigateTo({url: '../consult/main'})
+        wx.login({
+          success (res) {
+            if (res.code) {
+              //发起网络请求
+              wx.request({
+                url: 'http://192.168.1.21:8083/weChat/login',
+                data: {
+                  code: res.code
+                },
+                success: (data)=> {
+                  console.log(data.data)
+                }
+              })
+              // login()
+            } else {
+              console.log('登录失败！' + res.errMsg)
+            }
+          }
+        })
+        // wx.navigateTo({url: '../consult/main'})
       } else {
         this.isMask = true
       }
@@ -218,3 +239,5 @@ switch{
   border-top: 1rpx solid #ddd;
 }
 </style>
+
+// https://api.weixin.qq.com/sns/jscode2session?appid=wx32f31fd158ee1fbb&secret=952eae6770b30f3e6657209caa2e005e&js_code=081X7Lh12IPfAV0q9vg12XE5i12X7Lh-&grant_type=authorization_code
