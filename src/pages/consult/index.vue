@@ -6,14 +6,14 @@
           <span class="yellow">*</span>
           姓名
         </div>
-        <input class="input" type="text" placeholder="请输入姓名">
+        <input class="input" type="text" v-model="form.name" @blur="onBlur" placeholder="请输入姓名">
       </div>
       <div class="input-item">
         <div>
           <span class="yellow">*</span>
           手机号
         </div>
-        <input class="input" type="text" placeholder="请输入手机号">
+        <input class="input" type="text" v-model="form.phone" @blur="onBlur" placeholder="请输入手机号">
       </div>
       <div class="input-item">
         <div>
@@ -21,8 +21,9 @@
           验证码
         </div>
         <div>
-          <input class="input code" type="text" placeholder="请输入验证码">
-          <span class="get" @click="getCode">获取</span>
+          <input class="input code" type="text" v-model="form.code" @blur="onBlur" placeholder="请输入验证码">
+          <span v-if="isCoding" class="count-down">{{second}}</span>
+          <span v-else class="get" @click="getCode">获取</span>
         </div>
       </div>
       <div class="input-item">
@@ -30,11 +31,11 @@
           <span class="yellow">*</span>
           现居住地
         </div>
-        <input class="input" type="text" placeholder="请输入现居住地">
+        <input class="input" type="text" v-model="form.area" @blur="onBlur" placeholder="请输入现居住地">
       </div>
     </div>
-
-    <div class="bottton" @click="submit">立即估值</div>
+<!-- <button class="bottton" :disabled="!isAll" @click="submit"> 确认信息 </button> -->
+    <div class="bottton" :class="{disabled: !isAll}" @click="submit">确认信息</div>
 
     <div class="mask" v-if="isMask">
       <div class="cc">
@@ -50,19 +51,69 @@
 </template>
 
 <script>
-import {saveUser, getInfo, getCode} from '@/api/seasUser'
+import {saveUser, getInfo, getCode} from '@/api/weChat'
+import store from '@/store'
 
 export default {
   data() {
     return {
-      isMask: false
+      form: {
+        name: '',
+        phone: '',
+        code: '',
+        area: '',
+      },
+      isMask: false,
+      isCoding : false,
+      second: 60,
+      isAll: false
     };
   },
   mounted() {},
   methods: {
-    getCode() {},
+    getCode() {
+      // getCode(this.form.phone, () => {
+      //   })
+        this.isCoding = true
+        let timer = setInterval(() => {
+          this.second--
+          if (this.second <= 0) {
+            this.isCoding = false
+            clearInterval(timer)
+          }
+        }, 1000)
+        wx.getLocation({success: (res) => {
+          console.log(res)
+          let { latitude, longitude } = res
+          wx.openLocation({
+            latitude, longitude, success: (_res) => {
+               console.log(_res)
+            }
+          })
+        }})
+    },
     submit() {
-      this.isMask = true
+      // console.log(this.form)      
+      this.isAll && saveUser(this.form, () =>{
+        this.isMask = true
+        store.state.isCommit = true
+        console.log(store.state.isCommit)
+        wx.switchTab({url: '/pages/index/main'})
+        // wx.navigateBack({delta: 1})
+      })
+    },
+    onBlur() {
+      for (const key in this.form) {
+        if (this.form.hasOwnProperty(key)) {
+          // let temp = this.form[key].replace(/ /g, '')
+          // console.log(temp)
+          if (this.form[key].replace(/ /g, '')) {
+            this.isAll = true
+          } else {
+            this.isAll = false
+          }
+        }
+      }
     }
   }
 };
@@ -113,6 +164,10 @@ export default {
   background: linear-gradient(to right, #ff8b41, #ffb252);
   border-radius: 8px;
 }
+.disabled{
+  background: #ddd;
+  color: #fff;
+}
 /* 提示框 */
 .cc{
   width: 70%;
@@ -124,12 +179,23 @@ export default {
   margin: 12px 0;
 }
 .message{
-  color: #888;
+  color: #bbb;
   font-size: 12px;
   line-height: 20px;
 }
 .ok{
   padding-top: 12px;
   border-top: 1rpx solid #ddd;
+}
+.count-down{
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+  text-align-last: center;
+  background: #ddd;
+  border-radius: 50%;
+  color: #fff;
+  vertical-align: middle;
 }
 </style>

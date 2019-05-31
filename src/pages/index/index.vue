@@ -38,11 +38,13 @@
         <img class="condition-icon" src="/static/images/point@2x.png">
         本人名下有效资产证明／未抵押车辆／未抵押商品房等
       </div>
-      <div class="bottton" @click="submit">
-        立即咨询
-      </div>
-      <div class="agreen ac">
-      <switch type="checkbox" @change="checkboxChange"/>
+
+      <button v-if="value" class="bottton" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo">立即咨询</button>
+      <div v-else-if="isCommit" class="bottton">等待客服联系</div>
+      <div v-else class="bottton" @click="submit">立即咨询</div>
+
+      <div class="agreen ac" v-if="!isCommit">
+        <switch type="checkbox" @change="checkboxChange"/>
         勾选即表示已阅读并同意
         <span class="yellow"><a href="../agreement/main">《融资居间服务委托授权书》</a></span>
       </div>
@@ -65,7 +67,8 @@
 </template>
 
 <script>
-import {saveUser, getInfo, getCode, login} from '@/api/seasUser'
+import {saveUser, getInfo, getCode, login} from '@/api/weChat'
+import store from '@/store'
 
 export default {
   components: {
@@ -76,7 +79,10 @@ export default {
       isMask: false
     }
   },
-  created () {
+  computed: {
+    isCommit() {
+      return store.state.isCommit
+    }
   },
   methods: {
     submit () {
@@ -85,28 +91,24 @@ export default {
           success (res) {
             if (res.code) {
               //发起网络请求
-              wx.request({
-                url: 'http://192.168.1.21:8083/weChat/login',
-                data: {
-                  code: res.code
-                },
-                success: (data)=> {
-                  console.log(data.data)
-                }
+              login(res.code, (data) => {
+                console.log(data.data)
               })
-              // login()
             } else {
               console.log('登录失败！' + res.errMsg)
             }
           }
         })
-        // wx.navigateTo({url: '../consult/main'})
       } else {
         this.isMask = true
       }
     },
     checkboxChange (e) {
       this.value = e.target.value
+    },
+    onGotUserInfo(e) {
+       console.log(e.target.userInfo)
+       wx.navigateTo({url: '../consult/main'})
     }
   }
 }
@@ -201,6 +203,8 @@ export default {
   height: 45px;
   background: linear-gradient(to right, #ff8b41, #ffb252);
   border-radius: 8px;
+  font-size: 14px;
+  border: 0;
 }
 .agreen{
   font-size: 11px;
