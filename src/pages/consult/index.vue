@@ -34,6 +34,9 @@
         <input class="input" type="text" v-model="form.area" @blur="onBlur" placeholder="请输入现居住地">
       </div>
     </div>
+      <div class="tip" v-show="tip">
+        {{tip}}
+      </div>
 <!-- <button class="bottton" :disabled="!isAll" @click="submit"> 确认信息 </button> -->
     <div class="bottton" :class="{disabled: !isAll}" @click="submit">确认信息</div>
 
@@ -66,31 +69,37 @@ export default {
       isMask: false,
       isCoding : false,
       second: 60,
-      isAll: false
+      isAll: false,
+      tip: ''
     };
   },
   mounted() {},
   methods: {
     getCode() {
-      // getCode(this.form.phone, () => {
-      //   })
-        this.isCoding = true
-        let timer = setInterval(() => {
-          this.second--
-          if (this.second <= 0) {
-            this.isCoding = false
-            clearInterval(timer)
-          }
-        }, 1000)
-        wx.getLocation({success: (res) => {
-          console.log(res)
-          let { latitude, longitude } = res
-          wx.openLocation({
-            latitude, longitude, success: (_res) => {
-               console.log(_res)
+      this.tip = ''
+      if (this.form.phone.length === 11) {
+        getCode(this.form.phone, () => {
+          this.isCoding = true
+          let timer = setInterval(() => {
+            this.second--
+            if (this.second <= 0) {
+              this.isCoding = false
+              clearInterval(timer)
             }
+          }, 1000)
           })
-        }})
+      } else {
+        this.tip = '手机号格式错误'
+      }
+        // wx.getLocation({success: (res) => {
+        //   console.log(res)
+        //   let { latitude, longitude } = res
+        //   wx.openLocation({
+        //     latitude, longitude, success: (_res) => {
+        //        console.log(_res)
+        //     }
+        //   })
+        // }})
     },
     submit() {
       // console.log(this.form)      
@@ -197,5 +206,10 @@ export default {
   border-radius: 50%;
   color: #fff;
   vertical-align: middle;
+}
+.tip{
+  margin: 30rpx;
+  color: #f00;
+  font-size: 12px;
 }
 </style>

@@ -10,7 +10,7 @@ const controller = config.controllers.wechat
 export const saveUser = (data, success) => {
   return request({
     url: controller,
-    methods: 'post',
+    method: 'post',
     data,
     success
   })
@@ -23,7 +23,7 @@ export const saveUser = (data, success) => {
 export const getInfo = (data) => {
   return request({
     url: controller,
-    methods: 'put',
+    method: 'put',
     data
   })
 }
@@ -35,6 +35,7 @@ export const getInfo = (data) => {
 export const getCode = (data) => {
   return request({
     url: controller + `/sms`,
+    method: 'post',
     data: {
       phone: data
     },
