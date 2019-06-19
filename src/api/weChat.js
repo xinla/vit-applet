@@ -24,7 +24,7 @@ export const getInfo = (data) => {
   return request({
     url: controller,
     method: 'put',
-    data
+    data,
   })
 }
 
@@ -39,6 +39,9 @@ export const getCode = (data) => {
     data: {
       phone: data
     },
+    header: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   })
 }
 
