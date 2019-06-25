@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import {saveUser, getInfo, getCode, login} from '@/api/weChat'
+import {saveUser, getCode, login} from '@/api/weChat'
 import store from '@/store'
 
 export default {
@@ -92,7 +92,7 @@ export default {
             if (res.code) {
               //发起网络请求
               login(res.code, (data) => {
-                console.log(data.data)
+                console.log(1, data.data)
               })
             } else {
               console.log('登录失败！' + res.errMsg)
@@ -107,8 +107,12 @@ export default {
       this.value = e.target.value
     },
     onGotUserInfo(e) {
-       console.log(e.target.userInfo)
-       wx.navigateTo({url: '../consult/main'})
+       console.log(2, e.target.userInfo)
+       if (e.target.userInfo) {
+         saveUser(e.target.userInfo, () => {
+           wx.navigateTo({url: '../consult/main'})
+         })
+       }
     }
   }
 }

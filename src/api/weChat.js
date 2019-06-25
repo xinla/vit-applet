@@ -7,12 +7,12 @@ const controller = config.controllers.wechat
  * 保存微信公海客户添加
  * @param {*} data 
  */
-export const saveUser = (data, success) => {
+export const saveUser = (data, successCallback) => {
   return request({
     url: controller,
     method: 'post',
     data,
-    success
+    successCallback
   })
 }
 
@@ -20,11 +20,12 @@ export const saveUser = (data, success) => {
  * 查询
  * @param {*} data 
  */
-export const getInfo = (data) => {
+export const consult = (data, successCallback) => {
   return request({
     url: controller,
     method: 'put',
     data,
+    successCallback
   })
 }
 
@@ -48,14 +49,14 @@ export const getCode = (data) => {
 /**
  * 微信登录
  * @param {*} data 微信登录临时凭证
- * @param {*} success 
+ * @param {*} successCallback 
  */
-export const login = (data, success) => {
+export const login = (data, successCallback) => {
   return request({
     url: controller + `/login`,
     data: {
       code: data
     },
-    success,
+    successCallback,
   })
 }
