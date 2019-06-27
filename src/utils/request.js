@@ -9,12 +9,14 @@ const request = (config) => {
   //   console.warn('error')
   // }
   config.complete = (res) => {
-    console.log(res)
-    const { data, status } = res
-    if (status === 200 && data.code === 0) {
-      config.successCallback(data.result)
+    // console.log(res)
+    const { data, statusCode } = res
+    if (statusCode === 200 && data.code === 0) {
+      let _res = JSON.stringify(data.result) ? data.result : data.data
+      config.successCallback && config.successCallback(_res)
     } else {
       console.warn('error')
+      config.failedCallback && config.failedCallback(res)
     }
   }
   

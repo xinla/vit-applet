@@ -44,7 +44,7 @@
         </picker>
       </div>
     </div>
-    <div class="tip" v-show="tip">{{tip}}</div>
+    <!-- <div class="tip" v-show="tip">{{tip}}</div> -->
     <!-- <button class="bottton" :disabled="!isAll" @click="submit"> 确认信息 </button> -->
     <div class="bottton" :class="{disabled: !isAll}" @click="submit">确认信息</div>
 
@@ -59,23 +59,18 @@
       </div>
     </div>
 
-    <Toast v-model="isToast" message="4754" />
+    <Toast v-model="isToast" :message="tip" />
   </div>
 </template>
 
 <script>
 import { saveUser, consult, getCode } from "@/api/weChat";
 import store from "@/store";
-import Toast from "@/components/Toast";
 
 export default {
-  components:{
-    Toast
-  },
   data() {
     return {
       form: {
-        id: '',
         name: "",
         phone: "",
         code: "",
@@ -90,18 +85,22 @@ export default {
       tip: "",
       region: [],
       customItem: "全部",
-      isToast: false
+      isToast: false,
+      code: undefined
     };
   },
-  mounted() {},
+  mounted() {
+    this.form.phone = store.state.phone
+  },
   methods: {
     getCode() {
-      this.isToast = true
       this.tip = "";
       if (this.form.phone.length === 11) {
         getCode(this.form.phone, res => {
           console.log(res);
+          this.showToast('验证码已发送')
           this.isCoding = true;
+          this.code = res.code
           let timer = setInterval(() => {
             this.second--;
             if (this.second <= 0) {
@@ -109,9 +108,11 @@ export default {
               clearInterval(timer);
             }
           }, 1000);
+        }, (error) => {
+          this.showToast()
         });
       } else {
-        this.tip = "手机号格式错误";
+        this.showToast('手机号格式错误')
       }
       // wx.getLocation({success: (res) => {
       //   console.log(res)
@@ -125,36 +126,50 @@ export default {
     },
     submit() {
       // console.log(this.form)
-        this.isAll &&
-        consult(this.form, () => {
+      if (!this.isAll) {
+        return;
+      }
+      if (this.code != this.form.code) {
+        this.showToast('验证码错误')
+        return;
+      }
+      this.form.id = store.state.userId
+        consult(this.form, (res) => {
           this.isMask = true;
           store.state.isCommit = true;
-          console.log(store.state.isCommit);
+          // console.log(store.state.isCommit);
           wx.switchTab({ url: "/pages/index/main" });
           // wx.navigateBack({delta: 1})
+        }, (error) =>{
+          this.showToast()
         });
     },
     onBlur() {
       for (const key in this.form) {
         if (this.form.hasOwnProperty(key)) {
           // let temp = this.form[key].replace(/ /g, '')
-          // console.log(temp)
+          console.log(key, this.form[key])
           if (this.form[key] && this.form[key].replace(/ /g, "")) {
             this.isAll = true;
           } else {
             this.isAll = false;
+            return
           }
         }
       }
     },
     bindRegionChange(e) {
-      console.log("picker发送选择改变，携带值为", e.target.value);
+      // console.log("picker发送选择改变，携带值为", e.target.value);
       this.region = e.target.value
       this.form.provinceCode = e.target.code[0]
       this.form.cityCode = e.target.code[1]
       this.form.regionCode = e.target.code[2]
       this.onBlur()
-      console.log(e.target.code)
+      // console.log(e.target.code)
+    },
+    showToast(mes='请求失败') {
+      this.isToast = true
+      this.tip = mes
     }
   }
 };

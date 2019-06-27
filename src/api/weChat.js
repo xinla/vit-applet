@@ -7,12 +7,13 @@ const controller = config.controllers.wechat
  * 保存微信公海客户添加
  * @param {*} data 
  */
-export const saveUser = (data, successCallback) => {
+export const saveUser = (data, successCallback, failedCallback) => {
   return request({
     url: controller,
     method: 'post',
     data,
-    successCallback
+    successCallback, 
+    failedCallback
   })
 }
 
@@ -20,12 +21,22 @@ export const saveUser = (data, successCallback) => {
  * 查询
  * @param {*} data 
  */
-export const consult = (data, successCallback) => {
+export const consult = (data, successCallback, failedCallback) => {
   return request({
     url: controller,
     method: 'put',
     data,
-    successCallback
+    successCallback,
+    failedCallback
+  })
+}
+
+export const judgeAsked = (data, successCallback, failedCallback) => {
+  return request({
+    url: controller + `/isAsked/${data}`,
+    method: 'get',
+    successCallback,
+    failedCallback
   })
 }
 
@@ -33,13 +44,15 @@ export const consult = (data, successCallback) => {
  * 发送验证码
  * @param {*} phone 必须
  */
-export const getCode = (data) => {
+export const getCode = (data, successCallback, failedCallback) => {
   return request({
     url: controller + `/sms`,
     method: 'post',
     data: {
       phone: data
     },
+    successCallback,
+    failedCallback,
     header: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }

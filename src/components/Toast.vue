@@ -9,7 +9,7 @@
 <script>
 export default {
   props:{
-    message: 'chengngn',
+    message: '系统正忙，请稍后再试',
     value: {
       type: Boolean,
       default: false
@@ -38,6 +38,7 @@ export default {
 </script>
 <style scoped>
 .cc{
+  position: fixed;
   background: #666;
   padding: 0 10px;
   line-height: 30px;
