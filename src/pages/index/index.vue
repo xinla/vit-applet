@@ -120,7 +120,7 @@ export default {
     let _this = this
     // 用户授权
     wx.getUserInfo({
-      lang: 'zh_TW',
+      lang: 'zh_CN',
       success: function(res) {
         console.log(res)
         saveUser(res.userInfo, _res => {
@@ -132,7 +132,7 @@ export default {
         // 判断是否提交
         judgeAsked(res.userInfo.nickName, (res) => {
           console.log('isCommit: ', res)
-          this.store.state.isCommit = res
+          store.state.isCommit = res
         })
       },
       fail(res) {
