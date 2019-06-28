@@ -15,7 +15,7 @@ const request = (config) => {
       let _res = JSON.stringify(data.result) ? data.result : data.data
       config.successCallback && config.successCallback(_res)
     } else {
-      console.warn('error')
+      console.warn('error', res)
       config.failedCallback && config.failedCallback(res)
     }
   }

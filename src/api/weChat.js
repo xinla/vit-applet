@@ -31,10 +31,29 @@ export const consult = (data, successCallback, failedCallback) => {
   })
 }
 
+export const update = (data, successCallback, failedCallback) => {
+  return request({
+    url: controller + '/update',
+    method: 'put',
+    data,
+    successCallback,
+    failedCallback
+  })
+}
+
+/**
+ * 判断是否咨询过
+ * @param {*} data 
+ * @param {*} successCallback 
+ * @param {*} failedCallback 
+ */
 export const judgeAsked = (data, successCallback, failedCallback) => {
   return request({
-    url: controller + `/isAsked/${data}`,
+    url: controller + `/isAsked`,
     method: 'get',
+    data: {
+      nickName: data
+    },
     successCallback,
     failedCallback
   })

@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { saveUser, consult, getCode } from "@/api/weChat";
+import { saveUser, consult, getCode, update } from "@/api/weChat";
 import store from "@/store";
 
 export default {
