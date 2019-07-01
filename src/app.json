@@ -23,8 +23,8 @@
     }, {
       "text": "协议",
       "pagePath": "pages/agreement/main",
-      "iconPath": "static/tabs/orders.png",
-      "selectedIconPath": "static/tabs/orders-active.png"
+      "iconPath": "static/tabs/agreement.png",
+      "selectedIconPath": "static/tabs/agreement-active.png"
     }],
     "position": "bottom"
   },
