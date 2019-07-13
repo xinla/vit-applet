@@ -97,7 +97,7 @@ export default {
       this.tip = "";
       if (this.form.phone.length === 11) {
         getCode(this.form.phone, res => {
-          console.log(res);
+          // console.log(res);
           this.showToast('验证码已发送')
           this.isCoding = true;
           this.code = res.code
@@ -148,7 +148,7 @@ export default {
       for (const key in this.form) {
         if (this.form.hasOwnProperty(key)) {
           // let temp = this.form[key].replace(/ /g, '')
-          console.log(key, this.form[key])
+          // console.log(key, this.form[key])
           if (this.form[key] && this.form[key].replace(/ /g, "")) {
             this.isAll = true;
           } else {

@@ -122,16 +122,16 @@ export default {
     wx.getUserInfo({
       lang: 'zh_CN',
       success: function(res) {
-        console.log(res)
+        // console.log(res)
         saveUser(res.userInfo, _res => {
             store.state.userId = _res.id;          
             // this.value = false;
-             console.log(store.state.userId)
+            //  console.log(store.state.userId)
           }
         )
         // 判断是否提交
         judgeAsked(res.userInfo.nickName, (res) => {
-          console.log('isCommit: ', res)
+          // console.log('isCommit: ', res)
           store.state.isCommit = res
         })
       },
@@ -154,10 +154,10 @@ export default {
             if (res.code) {
               //发起网络请求
               login(res.code, data => {
-                console.log(1, data.data);
+                // console.log(1, data.data);
               });
             } else {
-              console.log("登录失败！" + res.errMsg);
+              // console.log("登录失败！" + res.errMsg);
             }
           }
         });
@@ -169,7 +169,7 @@ export default {
       this.value = e.target.value;
     },
     onGotUserInfo(e) {
-      console.log(2, e);
+      // console.log(2, e);
       this.isAuthorize = false
       if (e.target.userInfo) {
         saveUser(
@@ -177,7 +177,7 @@ export default {
           res => {
             store.state.userId = res.id;          
             // this.value = false;
-             console.log(store.state.userId)
+            //  console.log(store.state.userId)
           },
           error => {
             this.isToast = true;
@@ -187,7 +187,7 @@ export default {
     },
     onGetPhoneNumber(e) {
       if (e) {
-        console.log('GetPhoneNumber: ', e);
+        // console.log('GetPhoneNumber: ', e);
         wx.navigateTo({ url: "../consult/main" });
       }
     },
