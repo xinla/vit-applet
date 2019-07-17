@@ -138,10 +138,11 @@ export default {
           this.isMask = true;
           store.state.isCommit = true;
           // console.log(store.state.isCommit);
+          this.showToast('咨询成功，请等待客服联系')
           wx.switchTab({ url: "/pages/index/main" });
           // wx.navigateBack({delta: 1})
         }, (error) =>{
-          this.showToast()
+          this.showToast(error.data.data || error.data.message)
         });
     },
     onBlur() {
@@ -159,7 +160,7 @@ export default {
       }
     },
     bindRegionChange(e) {
-      // console.log("picker发送选择改变，携带值为", e.target.value);
+      console.log("picker发送选择改变，携带值为", e.target.value);
       this.region = e.target.value
       this.form.provinceCode = e.target.code[0]
       this.form.cityCode = e.target.code[1]

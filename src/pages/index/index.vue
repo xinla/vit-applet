@@ -1,18 +1,18 @@
 <template>
   <div>
     <div class="header">
-      <img class="bg" src="/static/images/pic-background@2x.png" alt>
+      <img class="bg" src="/static/images/pic-background@2x.png" alt />
       <div class="nav-wrap">
         <div class="nav-link">
-          <img class="nav-icon" src="/static/images/icon_chediya@2x.png">
+          <img class="nav-icon" src="/static/images/icon_chediya@2x.png" />
           车抵贷
         </div>
         <div class="nav-link">
-          <img class="nav-icon" src="/static/images/icon_fangdiya@2x.png">
+          <img class="nav-icon" src="/static/images/icon_fangdiya@2x.png" />
           房抵贷
         </div>
         <div class="nav-link">
-          <img class="nav-icon" src="/static/images/icon_xinyongdai@2x.png">
+          <img class="nav-icon" src="/static/images/icon_xinyongdai@2x.png" />
           信用贷
         </div>
       </div>
@@ -25,19 +25,19 @@
 
     <div class="main">
       <div class="condition">
-        <img class="condition-icon" src="/static/images/point@2x.png">
+        <img class="condition-icon" src="/static/images/point@2x.png" />
         中国（不含港、澳、台）公民
       </div>
       <div class="condition">
-        <img class="condition-icon" src="/static/images/point@2x.png">
+        <img class="condition-icon" src="/static/images/point@2x.png" />
         信誉良好、无恶意不良信用记录
       </div>
       <div class="condition">
-        <img class="condition-icon" src="/static/images/point@2x.png">
+        <img class="condition-icon" src="/static/images/point@2x.png" />
         有本地有效居住、工作证明
       </div>
       <div class="condition">
-        <img class="condition-icon" src="/static/images/point@2x.png">
+        <img class="condition-icon" src="/static/images/point@2x.png" />
         本人名下有效资产证明／未抵押车辆／未抵押商品房等
       </div>
 
@@ -46,14 +46,13 @@
         class="bottton"
         open-type="getPhoneNumber"
         lang="zh_CN"
-        :disabled="!isUserId"
         @getphonenumber="onGetPhoneNumber"
       >立即咨询</button>
       <div v-else-if="isCommit" class="bottton">等待客服联系</div>
       <div v-else class="bottton" @click="submit">立即咨询</div>
 
       <div class="agreen ac" v-if="!isCommit">
-        <switch type="checkbox" @change="checkboxChange"/>勾选即表示已阅读并同意
+        <switch type="checkbox" @change="checkboxChange" />勾选即表示已阅读并同意
         <span class="yellow">
           <a href="../agreement/main">《融资居间服务委托授权书》</a>
         </span>
@@ -65,102 +64,87 @@
         <div class="title">提示</div>
         <div class="message">
           请先阅读并同意
-          <br>《融资居间服务委托授权书》
+          <br />《融资居间服务委托授权书》
         </div>
         <div class="ok yellow" @click="isMask = false">好的</div>
       </div>
     </div>
     <!-- 授权提示弹窗 -->
-    <div class="mask" v-if="isAuthorize">
+    <div class="mask" v-if="isAuthorizeDialog">
       <div class="cc">
         <div class="title">提示</div>
         <div class="message">
           华圣百惠将请求获取您的基本信息
-          <br>
+          <br />
         </div>
         <div class="botton-wrap">
-          <div class="half" @click="isAuthorize = false">拒绝</div>
+          <div class="half" @click="isAuthorizeDialog = false">拒绝</div>
           <button
-          class="yellow half"
-          open-type="getUserInfo"
-          lang="zh_CN"
-          @getuserinfo="onGotUserInfo"
-        >好的</button>
+            class="yellow half"
+            open-type="getUserInfo"
+            lang="zh_CN"
+            @getuserinfo="onGotUserInfo"
+          >好的</button>
         </div>
       </div>
     </div>
 
-    <Toast v-model="isToast" :message="tip"/>
   </div>
 </template>
 
 <script>
-import { saveUser, getCode, login, judgeAsked } from "@/api/weChat";
+import { saveUser, getCode, login, judgeAsked, getPhone } from "@/api/weChat";
 import store from "@/store";
 
 export default {
   data() {
     return {
-      value: false,
-      isMask: false,
-      isToast: false,
-      isAuthorize: false,
-      tip: "",
+      value: false, // 是否同意协议
+      isMask: false, // 遮罩层
+      isAuthorize: true, // 用户是否授权给小程序 
+      isAuthorizeDialog: false // 是否弹出授权框
     };
   },
   computed: {
     isCommit() {
       return store.state.isCommit;
     },
-    isUserId() {
-      return store.state.userId;
-    }
   },
   mounted() {
-    let _this = this
-    // 用户授权
+    let _this = this;
+    // 判断用户是否授权
     wx.getUserInfo({
-      lang: 'zh_CN',
-      success: function(res) {
-        // console.log(res)
-        saveUser(res.userInfo, _res => {
-            store.state.userId = _res.id;          
-            // this.value = false;
-            //  console.log(store.state.userId)
-          }
-        )
-        // 判断是否提交
-        judgeAsked(res.userInfo.nickName, (res) => {
-          // console.log('isCommit: ', res)
-          store.state.isCommit = res
-        })
-      },
+      lang: "zh_CN",
       fail(res) {
-        // console.log('fail')
-        _this.isAuthorize = true
+        // console.log(res)
+        _this.isAuthorize = false;
+        _this.isAuthorizeDialog = true;
       }
     });
-    
   },
   methods: {
     submit() {
-      if (!store.state.userId) {
-        this.showToast('未获得授权，无法操作')
-        return
+      if (!this.isAuthorize) {
+        wx.showToast({
+          title: "未获得授权，无法操作",
+          icon: 'none',
+          duration: 2000
+        });
+        return;
       }
       if (this.value) {
-        wx.login({
-          success(res) {
-            if (res.code) {
-              //发起网络请求
-              login(res.code, data => {
-                // console.log(1, data.data);
-              });
-            } else {
-              // console.log("登录失败！" + res.errMsg);
-            }
-          }
-        });
+        // wx.login({
+        //   success(res) {
+        //     if (res.code) {
+        //       //发起网络请求
+        //       login(res.code, data => {
+        //         // console.log(1, data.data);
+        //       });
+        //     } else {
+        //       // console.log("登录失败！" + res.errMsg);
+        //     }
+        //   }
+        // });
       } else {
         this.isMask = true;
       }
@@ -170,33 +154,62 @@ export default {
     },
     onGotUserInfo(e) {
       // console.log(2, e);
-      this.isAuthorize = false
+      this.isAuthorizeDialog = false;
       if (e.target.userInfo) {
+        this.isAuthorize = true;
         saveUser(
           e.target.userInfo,
           res => {
-            store.state.userId = res.id;          
+            store.state.userId = res.id;
             // this.value = false;
             //  console.log(store.state.userId)
           },
           error => {
-            this.isToast = true;
+            // 保存失败调用
           }
         );
       }
     },
     onGetPhoneNumber(e) {
       if (e) {
-        // console.log('GetPhoneNumber: ', e);
-        wx.navigateTo({ url: "../consult/main" });
-      }
-    },
-    authorize() {
+        // console.log("GetPhoneNumber: ", e);
 
-    },
-    showToast(mes='请求失败') {
-      this.isToast = true
-      this.tip = mes
+        wx.login({
+          success(res) {
+            // console.log(res)
+            if (res.code) {
+              //发起网络请求
+              // 解析加密数据，获取用户手机号
+              let prams = {
+                encryptedData: e.target.encryptedData,
+                iv: e.target.iv,
+                code: res.code
+              };
+              getPhone(prams, res => {
+                // console.log(res);
+                store.state.phone = res.phoneNumber;
+
+                // 判断是否提交
+                judgeAsked(res.phoneNumber, res => {
+                  // console.log('isCommit: ', res)
+                  store.state.isCommit = res;
+                  if (res) {
+                    wx.showToast({
+                      title: "您已咨询过",
+                      icon: 'none',
+                      duration: 2000
+                    });
+                  } else {
+                    wx.navigateTo({ url: "../consult/main" });
+                  }
+                });
+              });
+            } else {
+              console.log("登录失败！" + res.errMsg);
+            }
+          }
+        });
+      }
     }
   }
 };
@@ -341,7 +354,7 @@ switch {
   font-size: 14px;
   border-radius: 50px;
 }
-.botton-wrap{
+.botton-wrap {
   margin-top: 10px;
   border-top: 1px solid #ddd;
 }

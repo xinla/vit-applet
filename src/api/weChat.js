@@ -52,7 +52,7 @@ export const judgeAsked = (data, successCallback, failedCallback) => {
     url: controller + `/isAsked`,
     method: 'get',
     data: {
-      nickName: data
+      phone: data
     },
     successCallback,
     failedCallback
@@ -89,6 +89,20 @@ export const login = (data, successCallback) => {
     data: {
       code: data
     },
+    successCallback,
+  })
+}
+
+/**
+ * 
+ * @param {*} data 
+ * @param {*} successCallback 
+ */
+export const getPhone = (data, successCallback) => {
+  return request({
+    url: controller + `/encrypt`,
+    method: 'post',
+    data,
     successCallback,
   })
 }
