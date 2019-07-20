@@ -6,14 +6,14 @@
           <span class="yellow">*</span>
           姓名
         </div>
-        <input class="input" type="text" v-model="form.name" @blur="onBlur" placeholder="请输入姓名">
+        <input class="input" type="text" v-model="form.name" @blur="onBlur" placeholder="请输入姓名" />
       </div>
       <div class="input-item">
         <div>
           <span class="yellow">*</span>
           手机号
         </div>
-        <input class="input" type="text" v-model="form.phone" @blur="onBlur" placeholder="请输入手机号">
+        <input class="input" type="text" v-model="form.phone" @blur="onBlur" placeholder="请输入手机号" />
       </div>
       <div class="input-item">
         <div>
@@ -27,7 +27,7 @@
             v-model="form.code"
             @blur="onBlur"
             placeholder="请输入验证码"
-          >
+          />
           <span v-if="isCoding" class="count-down">{{second}}</span>
           <span v-else class="get" @click="getCode">获取</span>
         </div>
@@ -37,10 +37,16 @@
           <span class="yellow">*</span>
           现居住地
         </div>
-        <picker mode="region" @change="bindRegionChange" :value="region" :custom-item="customItem">
-          <view class="picker">
-            {{region[0] ? (region[0] + '-' + region[1] + '-' + region[2]) : '请选择现居住地'}}
-            </view>
+        <picker
+          mode="region"
+          @change="bindRegionChange"
+          :value="region"
+          :custom-item="customItem"
+          @click="clearTimer"
+        >
+          <view
+            class="picker"
+          >{{region[0] ? (region[0] + '-' + region[1] + '-' + region[2]) : '请选择现居住地'}}</view>
         </picker>
       </div>
     </div>
@@ -53,7 +59,7 @@
         <div class="title">提示</div>
         <div class="message">
           专属客服即将与您联系
-          <br>请保持电话畅通
+          <br />请保持电话畅通
         </div>
         <div class="ok yellow" @click="isMask = false">好的</div>
       </div>
@@ -74,45 +80,61 @@ export default {
         name: "",
         phone: "",
         code: "",
-        provinceCode: undefined,
-        cityCode: undefined,
-        regionCode: undefined,
+        provinceCode: 0,
+        cityCode: 0,
+        regionCode: 0
       },
       isMask: false,
       isCoding: false,
       second: 60,
       isAll: false,
       tip: "",
-      region: [],
+      region: ["", "", ""],
       customItem: "全部",
       isToast: false,
-      code: undefined
+      code: undefined,
+      timer: ""
     };
   },
   mounted() {
-    this.form.phone = store.state.phone
+    this.form.phone = store.state.phone;
+
+    // this.isCoding = true;
+    // this.timer = setInterval(() => {
+    //         this.second--;
+    //         if (this.second <= 0) {
+    //           this.isCoding = false;
+    //           this.second = 60;
+    //           clearInterval(this.timer);
+    //         }
+    //       }, 1000);
   },
   methods: {
     getCode() {
       this.tip = "";
       if (this.form.phone.length === 11) {
-        getCode(this.form.phone, res => {
-          // console.log(res);
-          this.showToast('验证码已发送')
-          this.isCoding = true;
-          this.code = res.code
-          let timer = setInterval(() => {
-            this.second--;
-            if (this.second <= 0) {
-              this.isCoding = false;
-              clearInterval(timer);
-            }
-          }, 1000);
-        }, (error) => {
-          this.showToast()
-        });
+        getCode(
+          this.form.phone,
+          res => {
+            // console.log(res);
+            this.showToast("验证码已发送");
+            this.isCoding = true;
+            this.code = res.code;
+            this.timer = setInterval(() => {
+              this.second--;
+              if (this.second <= 0) {
+                this.isCoding = false;
+                this.second = 60;
+                clearInterval(this.timer);
+              }
+            }, 1000);
+          },
+          // error => {
+          //   this.showToast();
+          // }
+        );
       } else {
-        this.showToast('手机号格式错误')
+        this.showToast("手机号格式错误");
       }
       // wx.getLocation({success: (res) => {
       //   console.log(res)
@@ -130,22 +152,27 @@ export default {
         return;
       }
       if (this.code != this.form.code) {
-        this.showToast('验证码错误')
+        this.showToast("验证码错误");
         return;
       }
-      this.form.id = store.state.userId
-        consult(this.form, (res) => {
+      this.form.id = store.state.userId;
+      consult(
+        this.form,
+        res => {
           this.isMask = true;
           store.state.isCommit = true;
           // console.log(store.state.isCommit);
-          this.showToast('咨询成功，请等待客服联系')
+          this.showToast("咨询成功，请等待客服联系");
           wx.switchTab({ url: "/pages/index/main" });
           // wx.navigateBack({delta: 1})
-        }, (error) =>{
-          this.showToast(error.data.data || error.data.message)
-        });
+        },
+        // error => {
+        //   this.showToast(error.data.data || error.data.message);
+        // }
+      );
     },
     onBlur() {
+      // console.log('blur')
       for (const key in this.form) {
         if (this.form.hasOwnProperty(key)) {
           // let temp = this.form[key].replace(/ /g, '')
@@ -154,23 +181,35 @@ export default {
             this.isAll = true;
           } else {
             this.isAll = false;
-            return
+            return;
           }
         }
       }
     },
     bindRegionChange(e) {
+      this.timer = setInterval(() => {
+        this.second--;
+        if (this.second <= 0) {
+          this.isCoding = false;
+          this.second = 60;
+          clearInterval(this.timer);
+        }
+      }, 1000);
+
       console.log("picker发送选择改变，携带值为", e.target.value);
-      this.region = e.target.value
-      this.form.provinceCode = e.target.code[0]
-      this.form.cityCode = e.target.code[1]
-      this.form.regionCode = e.target.code[2]
-      this.onBlur()
+      this.region = e.target.value;
+      this.form.provinceCode = e.target.code[0];
+      this.form.cityCode = e.target.code[1];
+      this.form.regionCode = e.target.code[2];
+      this.onBlur();
       // console.log(e.target.code)
     },
-    showToast(mes='请求失败') {
-      this.isToast = true
-      this.tip = mes
+    showToast(mes = "请求失败") {
+      this.isToast = true;
+      this.tip = mes;
+    },
+    clearTimer() {
+      clearInterval(this.timer);
     }
   }
 };
@@ -261,7 +300,7 @@ export default {
   color: #f00;
   font-size: 12px;
 }
-.picker{
+.picker {
   color: #888;
 }
 </style>

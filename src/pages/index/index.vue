@@ -42,7 +42,7 @@
       </div>
 
       <button
-        v-if="value && !isCommit"
+        v-if="value && !isCommit && isAuthorize"
         class="bottton"
         open-type="getPhoneNumber"
         lang="zh_CN"
@@ -88,7 +88,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -101,16 +100,41 @@ export default {
     return {
       value: false, // 是否同意协议
       isMask: false, // 遮罩层
-      isAuthorize: true, // 用户是否授权给小程序 
-      isAuthorizeDialog: false // 是否弹出授权框
+      isAuthorize: true, // 用户基本信息是否授权给小程序
+      isAuthorizeDialog: false, // 是否弹出授权框，
+      code: ""
     };
   },
   computed: {
     isCommit() {
       return store.state.isCommit;
-    },
+    }
   },
   mounted() {
+    // 小程序版本检查更新
+    const updateManager = wx.getUpdateManager();
+    // updateManager.onCheckForUpdate(function(res) {
+    //   // 请求完新版本信息的回调
+    //   console.log(res.hasUpdate);
+    // });
+    updateManager.onUpdateReady(function() {
+      wx.showModal({
+        title: "更新提示",
+        content: "新版本已经准备好，是否马上重启小程序？",
+        success: function(res) {
+          if (res.confirm) {
+            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+            updateManager.applyUpdate();
+          }
+        }
+      });
+    });
+    // updateManager.onUpdateFailed(function() {
+    //   // 新的版本下载失败
+    // });
+
+    this.login();
+
     let _this = this;
     // 判断用户是否授权
     wx.getUserInfo({
@@ -127,24 +151,12 @@ export default {
       if (!this.isAuthorize) {
         wx.showToast({
           title: "未获得授权，无法操作",
-          icon: 'none',
+          icon: "none",
           duration: 2000
         });
         return;
       }
       if (this.value) {
-        // wx.login({
-        //   success(res) {
-        //     if (res.code) {
-        //       //发起网络请求
-        //       login(res.code, data => {
-        //         // console.log(1, data.data);
-        //       });
-        //     } else {
-        //       // console.log("登录失败！" + res.errMsg);
-        //     }
-        //   }
-        // });
       } else {
         this.isMask = true;
       }
@@ -157,59 +169,87 @@ export default {
       this.isAuthorizeDialog = false;
       if (e.target.userInfo) {
         this.isAuthorize = true;
-        saveUser(
-          e.target.userInfo,
-          res => {
-            store.state.userId = res.id;
-            // this.value = false;
-            //  console.log(store.state.userId)
-          },
-          error => {
-            // 保存失败调用
-          }
-        );
       }
     },
     onGetPhoneNumber(e) {
+      let _this = this;
+      // if (!this.isAuthorize) {
+      //   wx.showToast({
+      //     title: "未获得授权，无法操作",
+      //     icon: "none",
+      //     duration: 2000
+      //   });
+      //   return;
+      // }
+
       if (e) {
         // console.log("GetPhoneNumber: ", e);
+        // 解析加密数据，获取用户手机号
+        let prams = {
+          encryptedData: e.target.encryptedData,
+          iv: e.target.iv,
+          code: this.code
+        };
 
-        wx.login({
-          success(res) {
-            // console.log(res)
-            if (res.code) {
-              //发起网络请求
-              // 解析加密数据，获取用户手机号
-              let prams = {
-                encryptedData: e.target.encryptedData,
-                iv: e.target.iv,
-                code: res.code
-              };
-              getPhone(prams, res => {
-                // console.log(res);
-                store.state.phone = res.phoneNumber;
-
-                // 判断是否提交
-                judgeAsked(res.phoneNumber, res => {
-                  // console.log('isCommit: ', res)
-                  store.state.isCommit = res;
-                  if (res) {
-                    wx.showToast({
-                      title: "您已咨询过",
-                      icon: 'none',
-                      duration: 2000
-                    });
-                  } else {
-                    wx.navigateTo({ url: "../consult/main" });
-                  }
-                });
+        wx.checkSession({
+          success() {
+            //session_key 未过期，并且在本生命周期一直有效
+            // console.log("session_key 未过期，进入getPhone");
+            getPhone(prams, res => {
+              // console.log(res);
+              store.state.phone = res.phoneNumber;
+              // 判断是否提交
+              judgeAsked(res.phoneNumber, _res => {
+                // console.log('isCommit: ', _res)
+                store.state.isCommit = _res;
+                if (_res) {
+                  wx.showToast({
+                    title: "您已咨询过",
+                    icon: "none",
+                    duration: 2000
+                  });
+                } else {
+                  wx.getUserInfo({
+                    lang: "zh_CN",
+                    success(res) {
+                      // console.log(res)
+                      saveUser(res.userInfo, _res => {
+                        store.state.userId = _res.id;
+                        // this.value = false;
+                        //  console.log(store.state.userId)
+                        wx.navigateTo({ url: "../consult/main" });
+                      });
+                    }
+                  });
+                }
               });
-            } else {
-              console.log("登录失败！" + res.errMsg);
-            }
+            });
+          },
+          fail() {
+            // console.log("session_key 已经失效");
+            wx.showToast({
+              title: "获取权限过期，请重试",
+              icon: "none",
+              duration: 2000
+            });
+            // session_key 已经失效，需要重新执行登录流程
+            _this.login(); //重新登录
           }
         });
       }
+    },
+    login() {
+      let _this = this;
+      wx.login({
+        success(res) {
+          // console.log(res)
+          if (res.code) {
+            _this.code = res.code;
+          } else {
+            // console.log("登录失败！" + res.errMsg);
+          }
+        }
+      });
     }
   }
 };

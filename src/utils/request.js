@@ -16,6 +16,11 @@ const request = (config) => {
       config.successCallback && config.successCallback(_res)
     } else {
       console.warn('error', res)
+      wx.showToast({
+        title: res.data.data || res.data.message,
+        icon: "none",
+        duration: 2000
+      });
       config.failedCallback && config.failedCallback(res)
     }
   }
