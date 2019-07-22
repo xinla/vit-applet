@@ -181,8 +181,10 @@ export default {
       //   });
       //   return;
       // }
+      
+      // console.log(e);
 
-      if (e) {
+      if (e.target.iv) {
         // console.log("GetPhoneNumber: ", e);
         // 解析加密数据，获取用户手机号
         let prams = {
@@ -235,6 +237,12 @@ export default {
             // session_key 已经失效，需要重新执行登录流程
             _this.login(); //重新登录
           }
+        });
+      } else {
+        wx.showToast({
+          title: "未获得授权",
+          icon: "none",
+          duration: 2000
         });
       }
     },

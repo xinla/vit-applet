@@ -196,7 +196,7 @@ export default {
         }
       }, 1000);
 
-      console.log("picker发送选择改变，携带值为", e.target.value);
+      // console.log("picker发送选择改变，携带值为", e.target.value);
       this.region = e.target.value;
       this.form.provinceCode = e.target.code[0];
       this.form.cityCode = e.target.code[1];

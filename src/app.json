@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/main",
     "pages/agreement/main",
+    "pages/about/main",
     "pages/consult/main"
   ],
   "window": {
@@ -21,10 +22,10 @@
       "iconPath": "static/tabs/home.png",
       "selectedIconPath": "static/tabs/home-active.png"
     }, {
-      "text": "协议",
-      "pagePath": "pages/agreement/main",
-      "iconPath": "static/tabs/agreement.png",
-      "selectedIconPath": "static/tabs/agreement-active.png"
+      "text": "关于",
+      "pagePath": "pages/about/main",
+      "iconPath": "static/tabs/about.png",
+      "selectedIconPath": "static/tabs/about-active.png"
     }],
     "position": "bottom"
   },
