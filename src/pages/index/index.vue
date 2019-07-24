@@ -92,7 +92,13 @@
 </template>
 
 <script>
-import { saveUser, getCode, login, judgeAsked, getPhone } from "@/api/weChat";
+import {
+  saveUser,
+  getCode,
+  login,
+  judgeAsked,
+  decryptData
+} from "@/api/weChat";
 import store from "@/store";
 
 export default {
@@ -111,6 +117,10 @@ export default {
     }
   },
   mounted() {
+    // 显示分享按钮
+    wx.showShareMenu({
+      withShareTicket: true
+    });
     // 小程序版本检查更新
     const updateManager = wx.getUpdateManager();
     // updateManager.onCheckForUpdate(function(res) {
@@ -133,17 +143,32 @@ export default {
     //   // 新的版本下载失败
     // });
 
-    this.login();
+    // 防止接口延迟
+    wx.showLoading({
+      mask: true
+    });
 
-    let _this = this;
-    // 判断用户是否授权
-    wx.getUserInfo({
-      lang: "zh_CN",
-      fail(res) {
-        // console.log(res)
-        _this.isAuthorize = false;
-        _this.isAuthorizeDialog = true;
-      }
+    this.login(() => {
+      let _this = this;
+      // 判断用户是否授权
+      wx.getUserInfo({
+        lang: "zh_CN",
+        success(res) {
+          // console.log('userInfo ', res);
+          let prams = {
+            encryptedData: res.encryptedData,
+            iv: res.iv,
+            code: _this.code
+          };
+          _this.judge(prams);
+        },
+        fail(res) {
+          wx.hideLoading();
+          // console.log(res)
+          _this.isAuthorize = false;
+          _this.isAuthorizeDialog = true;
+        }
+      });
     });
   },
   methods: {
@@ -169,6 +194,14 @@ export default {
       this.isAuthorizeDialog = false;
       if (e.target.userInfo) {
         this.isAuthorize = true;
+
+        let prams = {
+          encryptedData: e.target.encryptedData,
+          iv: e.target.iv,
+          code: this.code
+        };
+
+        this.judge(prams);
       }
     },
     onGetPhoneNumber(e) {
@@ -181,7 +214,7 @@ export default {
       //   });
       //   return;
       // }
-      
+
       // console.log(e);
 
       if (e.target.iv) {
@@ -197,34 +230,10 @@ export default {
           success() {
             //session_key 未过期，并且在本生命周期一直有效
             // console.log("session_key 未过期，进入getPhone");
-            getPhone(prams, res => {
+            decryptData(prams, res => {
               // console.log(res);
               store.state.phone = res.phoneNumber;
-              // 判断是否提交
-              judgeAsked(res.phoneNumber, _res => {
-                // console.log('isCommit: ', _res)
-                store.state.isCommit = _res;
-                if (_res) {
-                  wx.showToast({
-                    title: "您已咨询过",
-                    icon: "none",
-                    duration: 2000
-                  });
-                } else {
-                  wx.getUserInfo({
-                    lang: "zh_CN",
-                    success(res) {
-                      // console.log(res)
-                      saveUser(res.userInfo, _res => {
-                        store.state.userId = _res.id;
-                        // this.value = false;
-                        //  console.log(store.state.userId)
-                        wx.navigateTo({ url: "../consult/main" });
-                      });
-                    }
-                  });
-                }
-              });
+              wx.navigateTo({ url: "../consult/main" });
             });
           },
           fail() {
@@ -246,17 +255,42 @@ export default {
         });
       }
     },
-    login() {
+    login(callback) {
       let _this = this;
       wx.login({
         success(res) {
           // console.log(res)
           if (res.code) {
             _this.code = res.code;
+            callback && callback();
           } else {
             // console.log("登录失败！" + res.errMsg);
           }
         }
+      });
+    },
+    judge(prams) {
+      decryptData(prams, res1 => {
+        // console.log("decryptUserInfo: ", res1);
+        // 判断是否提交
+        judgeAsked(res1.unionId, res2 => {
+          // console.log('isCommit: ', res2)
+          store.state.isCommit = res2;
+          if (res2) {
+            wx.showToast({
+              title: "您已咨询过",
+              icon: "none",
+              duration: 2000
+            });
+          } else {
+            saveUser(res1, _res => {
+              wx.hideLoading();
+              store.state.userId = _res.id;
+              // this.value = false;
+              //  console.log('userId ', store.state.userId)
+            });
+          }
+        });
       });
     }
   }

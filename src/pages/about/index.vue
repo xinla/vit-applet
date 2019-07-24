@@ -1,7 +1,7 @@
 <template>
   <div class="wrap">
     <img class="logo" src="/static/images/logo.png" alt />
-    <div class="level">版本：1.0.3</div>
+    <div class="level">版本：1.0.4</div>
   </div>
 </template>
 

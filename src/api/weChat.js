@@ -52,7 +52,7 @@ export const judgeAsked = (data, successCallback, failedCallback) => {
     url: controller + `/isAsked`,
     method: 'get',
     data: {
-      phone: data
+      unionId: data
     },
     successCallback,
     failedCallback
@@ -92,13 +92,13 @@ export const login = (data, successCallback) => {
     successCallback,
   })
 }
-
+"oU8OS0dTFAaCqShxi4OcakwV5QKI"
 /**
- * 
+ * 解密用户加密的数据
  * @param {*} data 
  * @param {*} successCallback 
  */
-export const getPhone = (data, successCallback) => {
+export const decryptData = (data, successCallback) => {
   return request({
     url: controller + `/encrypt`,
     method: 'post',

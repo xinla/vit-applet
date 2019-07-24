@@ -41,7 +41,6 @@
           mode="region"
           @change="bindRegionChange"
           :value="region"
-          :custom-item="customItem"
           @click="clearTimer"
         >
           <view
@@ -90,7 +89,6 @@ export default {
       isAll: false,
       tip: "",
       region: ["", "", ""],
-      customItem: "全部",
       isToast: false,
       code: undefined,
       timer: ""
