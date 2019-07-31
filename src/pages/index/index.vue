@@ -233,7 +233,14 @@ export default {
             decryptData(prams, res => {
               // console.log(res);
               store.state.phone = res.phoneNumber;
-              wx.navigateTo({ url: "../consult/main" });
+              if (store.state.userId) {
+                wx.navigateTo({ url: "../consult/main" });
+              } else {
+                wx.showToast({
+                  title: "系统忙，请稍后重试",
+                  icon: "none"
+                });
+              }
             });
           },
           fail() {
@@ -275,8 +282,8 @@ export default {
         // 判断是否提交
         judgeAsked(res1.unionId, res2 => {
           // console.log('isCommit: ', res2)
-          store.state.isCommit = res2;
           if (res2) {
+            store.state.isCommit = res2;
             wx.showToast({
               title: "您已咨询过",
               icon: "none",

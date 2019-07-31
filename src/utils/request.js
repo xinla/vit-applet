@@ -17,7 +17,7 @@ const request = (config) => {
     } else {
       console.warn('error', res)
       wx.showToast({
-        title: res.data.data || res.data.message,
+        title: res.data && (res.data.data || res.data.message),
         icon: "none",
         duration: 2000
       });
